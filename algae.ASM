@@ -20,9 +20,10 @@ section .data
 	S_IWUSR equ 00200q
 	S_IRUSR equ 00400q
 ;;; ;;;;;;;;;;;;;;;;;;;; Registers & Dataflow	
-	aReg db 17
-	bReg db 9	
+	aReg db 0
+	bReg db 0	
 	cReg db 0
+;;; 
 	fileDesc dq 0
 	fileName db 'out.buf', NULL
 	dispBuf db 'disp.buf', NULL
@@ -30,7 +31,7 @@ section .data
 ;;; calculation hand calculate vector assembly calculation, hand assembler macro refal sty lisp
 ;;; prolog solver common lisp to gen formal prove hand write matr calc	
 ;;;  FLAT MEMORY and Display Buffers	
-	msg db "L k F x Compiler", LINEFEED
+	msg db "L k F x Refal!", LINEFEED
 	stdi_buf db 5
 	displayBuf db "oxxoooooo!", LINEFEED
 	herBuf db "0000000000", LINEFEED
@@ -53,8 +54,8 @@ section .data
 	otherBuff db "0000000000"
 ;;;  end bitmap buffer
 ;;; Channel Buffers
-	bufLen db 12
-	msgLen db 12	
+	bufLen db 2
+	msgLen db 16	
 ;;; ;;;;;;;;;;;;;;;;;;;;; Program	
 section .text
 	global _start
@@ -68,30 +69,36 @@ _start:
 	mov rsi, msg
 	mov rdx, qword [msgLen]
 	syscall
-;;; ;;;;;;;;;;;;;;;;;;;;;; lib.bin write
+;;; ;;;;;;;;;;;;;;;;;;;;;; out.buf write (fileName)
+	
+;;;  open file handle for Read & Write
 	mov rax, SYS_creat
 	mov rdi, fileName
-	mov rsi, S_IRUSR | S_IWUSR
+	mov rsi, S_IRUSR | S_IWUSR	
 	syscall
+	
+;; write msg of msgLen to file handle buf?
 	mov qword [fileDesc], rax	
 	mov rax, SYS_write
 	mov rdi, qword [fileDesc]
 	mov rsi, msg
-	mov rdx, qword [msgLen]
-	syscall	
-;;;  fileDesc displayBuf bufLen sys_write 	
-	mov rax, SYS_write
-	mov rdi, qword [fileDesc]
-	mov rsi, displayBuf
-	mov rdx, qword [bufLen]
+	mov rdx, [msgLen]
 	syscall
+	
+;; ;;;  fileDesc displayBuf bufLen sys_write 	
+;; 	mov rax, SYS_write
+;; 	mov rdi, qword [fileDesc]
+;; 	mov rsi, displayBuf
+;; 	mov rdx, qword [bufLen]
+;; 	syscall
+;; 	jmp skip
 ;;;  REPL SECTION
 repl:	
 ;;; (read eval)
 	xor eax, eax ; rax <- 0 syscall
 	xor edi, edi ; rdi <- 0 stdin
 	mov rsi, stdi_buf ; rsi <- buf_addr
-	mov edx, 5 ; rdx <- buf_siz
+	mov rdx, 5 ; rdx <- buf_siz
 	syscall	
 ;;;  (buf read)
 	mov rax, 1
@@ -102,7 +109,8 @@ repl:
 ;;;  linux read file asm syscall		
 ;; End int to str out	
 	jmp repl
-;;; END REPL SECTION	
+;;; END REPL SECTION
+skip:	
 ;;; ;;;;;;;;;;;;;;;;;;;;; SYS_exit
 	mov rax, 60
 	mov rdi, 0
