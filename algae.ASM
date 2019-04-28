@@ -26,6 +26,7 @@ section .data
 ;;; 
 	fileDesc dq 0
 	fileName db 'out.buf', NULL
+	readFileName db 'mcguf.buf', NULL
 	dispBuf db 'disp.buf', NULL
 ;;; asmbla string follow source for refal proecss relate to paper l k f x writing hand compile func
 ;;; calculation hand calculate vector assembly calculation, hand assembler macro refal sty lisp
@@ -42,15 +43,16 @@ section .data
 	docBuf3 db "(we want to represent data cleanly, data entry repl?)",LINEFEED	
 ;;;  <---AX
 	docBuf4 db "(SYM entry)",LINEFEED
-	;; how to allocate buffers?
+	
+	;; how to allocate buffers/memory dataflow
+	;; clock core cpu use, top
 ;;;  <---
-	docBuf5 db "(print list of SYMs)",LINEFEED
-	docBuf6 db "(compile sym cons cell run ASM program)",LINEFEED
-	curStatus db "(a repl input -> buf store -> print loop)",LINEFEED
-;;; bitmap buffer
-;;;  lisp asm macro assmebler?
-	otherBuf1 db "                "
+	docBuf5 db "(print list of SYMs)"
+	docBuf6 db "(compile sym cons cell run ASM program)"
+	
 
+;;;  bitmap buffers
+	otherBuf1 db "                "
 	otherBuff db "0000000000"
 ;;;  end bitmap buffer
 ;;; Channel Buffers
@@ -70,6 +72,10 @@ _start:
 	mov rdx, qword [msgLen]
 	syscall
 ;;; ;;;;;;;;;;;;;;;;;;;;;; out.buf write (fileName)
+
+;;;  we want to open mcguf.buf, copy the contents
+;;; into memory then write it to out.buf (Conct operatiojn)
+;;;  involving read and write
 	
 ;;;  open file handle for Read & Write
 	mov rax, SYS_creat
@@ -84,16 +90,11 @@ _start:
 	mov rsi, msg
 	mov rdx, [msgLen]
 	syscall
-	
-;; ;;;  fileDesc displayBuf bufLen sys_write 	
-;; 	mov rax, SYS_write
-;; 	mov rdi, qword [fileDesc]
-;; 	mov rsi, displayBuf
-;; 	mov rdx, qword [bufLen]
-;; 	syscall
-;; 	jmp skip
+
+
 ;;;  REPL SECTION
-repl:	
+repl:
+	
 ;;; (read eval)
 	xor eax, eax ; rax <- 0 syscall
 	xor edi, edi ; rdi <- 0 stdin
