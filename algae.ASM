@@ -19,45 +19,29 @@ section .data
 	O_WRONLY equ 000001q
 	S_IWUSR equ 00200q
 	S_IRUSR equ 00400q
-;;; ;;;;;;;;;;;;;;;;;;;; Registers & Dataflow	
+;;; ;;;;;;;;;;;;;;;;;;;; Flat Mem, Regs, & Dataflow	
 	aReg db 0
 	bReg db 0	
 	cReg db 0
-;;; 
+	ain equ 8
+	bin equ 9
+;;; Channel and Flat Memory Buffers
+	msgLen db 16
+	;; msg_buf db ".", NULL
+	
+	;; mem_len db 32
+	;; mem_buf db ".................."
+	;; mem_buf2 db ".................."
+
+;;;  ^ flat mem buf yasm repeat?
+	
+;;; file and stdlib handles
 	fileDesc dq 0
 	fileName db 'out.buf', NULL
-	readFileName db 'mcguf.buf', NULL
-	dispBuf db 'disp.buf', NULL
-;;; asmbla string follow source for refal proecss relate to paper l k f x writing hand compile func
-;;; calculation hand calculate vector assembly calculation, hand assembler macro refal sty lisp
-;;; prolog solver common lisp to gen formal prove hand write matr calc	
-;;;  FLAT MEMORY and Display Buffers	
+	readFileName db 'read.buf', NULL
 	msg db "L k F x Refal!", LINEFEED
-	stdi_buf db 5
-	displayBuf db "oxxoooooo!", LINEFEED
-	herBuf db "0000000000", LINEFEED
-	goalBufC db "(compiler documentation)",LINEFEED
-;;;  Documentation Buffers	
-	docBuf1 db "(ALGAE - the alebraic-geometric automata environment)",LINEFEED
-	docBuf2 db "(we want an automata/group theoretic geom solver)",LINEFEED	
-	docBuf3 db "(we want to represent data cleanly, data entry repl?)",LINEFEED	
-;;;  <---AX
-	docBuf4 db "(SYM entry)",LINEFEED
-	
-	;; how to allocate buffers/memory dataflow
-	;; clock core cpu use, top
-;;;  <---
-	docBuf5 db "(print list of SYMs)"
-	docBuf6 db "(compile sym cons cell run ASM program)"
-	
+	stdi_buf db "00000000000000"
 
-;;;  bitmap buffers
-	otherBuf1 db "                "
-	otherBuff db "0000000000"
-;;;  end bitmap buffer
-;;; Channel Buffers
-	bufLen db 2
-	msgLen db 16	
 ;;; ;;;;;;;;;;;;;;;;;;;;; Program	
 section .text
 	global _start
@@ -73,9 +57,6 @@ _start:
 	syscall
 ;;; ;;;;;;;;;;;;;;;;;;;;;; out.buf write (fileName)
 
-;;;  we want to open mcguf.buf, copy the contents
-;;; into memory then write it to out.buf (Conct operatiojn)
-;;;  involving read and write
 	
 ;;;  open file handle for Read & Write
 	mov rax, SYS_creat
@@ -87,10 +68,17 @@ _start:
 	mov qword [fileDesc], rax	
 	mov rax, SYS_write
 	mov rdi, qword [fileDesc]
-	mov rsi, msg
-	mov rdx, [msgLen]
-	syscall
 
+;;;  Summation Program
+	mov ecx, ain
+	add ecx, bin
+	add ecx, bin	
+	mov [msg], ecx
+	
+	mov rsi, msg
+	;; write one byte of result to file
+	mov rdx, 1
+	syscall
 
 ;;;  REPL SECTION
 repl:
@@ -105,7 +93,7 @@ repl:
 	mov rax, 1
 	mov rdi, 1
 	mov rsi, stdi_buf
-	mov rdx, qword [msgLen]
+	mov rdx, 10
 	syscall
 ;;;  linux read file asm syscall		
 ;; End int to str out	
@@ -116,3 +104,7 @@ skip:
 	mov rax, 60
 	mov rdi, 0
 	syscall	
+
+;;; and or xor not dov mul inc cmp jne jge
+;;; SCAS 
+;;; CMPS 
